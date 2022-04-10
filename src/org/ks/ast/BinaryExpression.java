@@ -18,6 +18,7 @@ import org.ks.core.KsException;
 import org.ks.runtime.Environment;
 import org.ks.runtime.MemberSymbols;
 import org.ks.runtime.Symbols;
+import org.ks.runtime.VarType;
 
 /**
  * 二元表达式.
@@ -62,15 +63,15 @@ public class BinaryExpression extends ASTList {
 		String op = operator();
 		if ("=".equals(op)) {
 			Object right = right().eval(env);
-			return computeLeft(env, right);
+			return arithmeticLeft(env, right);
 		} else {
 			Object left = left().eval(env);
 			Object right = right().eval(env);
-			return computeOp(left, op, right);
+			return arithmetic(left, right, op);
 		}
 	}
 	
-	protected Object computeOp(Object left, String op, Object right) {
+	protected Object arithmetic(Object left, Object right, String op) {
 		switch(op) {
 			case "+":
 				return au.plus(left, right);
@@ -83,32 +84,20 @@ public class BinaryExpression extends ASTList {
 			case "%":
 				return au.mod(left, right);
 			case "==":
-				return au.compare(left, right, "==");
 			case "!=":
-				return au.compare(left, right, "!=");
 			case "&&":
-				return au.compare(left, right, "&&");
 			case ">":
-				return au.compare(left, right, ">");
 			case "<":
-				return au.compare(left, right, "<");
 			case ">=":
-				return au.compare(left, right, ">=");
 			case "<=":
-				return au.compare(left, right, "<=");
 			case "<=>":
-				/*if (left != null && right != null) {
-					return ((Class<?>)right).isAssignableFrom(left.getClass())?true : false;
-				} else {
-					return false;
-				}*/
-				return au.compare(left, right, "<=>");
+				return au.compare(left, right, op);
 			default:
 				throw new KsException("错误的运算符", this);
 		}
 	}
 	
-	protected Object computeLeft(Environment env, Object rvalue) {
+	protected Object arithmeticLeft(Environment env, Object rvalue) {
     ASTNode l = left();
     if (l instanceof Name) {
         ((Name)l).evalLeft(env, rvalue);
@@ -116,46 +105,47 @@ public class BinaryExpression extends ASTList {
     } else {
 
     	if (l instanceof PrimaryExpression) {
-  			PrimaryExpression p = (PrimaryExpression) l;
-  			if (p.hasPostfix(0) && p.postfix(0) instanceof Dot) { // 类
-  				Object t = ((PrimaryExpression) l).evalSub(env, 1);
+  			PrimaryExpression pe = (PrimaryExpression) l;
+  			if (pe.hasPostfix(0) && pe.postfix(0) instanceof Dot) { // 类
+  				Object obj = pe.evalSub(env, 1);
   				// System.out.println(p.postfix(0));
   				// System.out.println(t.getClass());
-  				if (t instanceof KsObject) {
-            return setField((KsObject)t, (Dot)p.postfix(0), rvalue);
+  				if (obj instanceof KsObject) {
+            return setField((KsObject)obj, (Dot)pe.postfix(0), rvalue);
   				} else { // java类
       			try {
       				Class<?> c = null;
-      				if (t instanceof String) { // 对字符串的判断需要改进
-      					c = Class.forName(t.toString());
-      					c.getField(((Dot)p.postfix(0)).name()).set(c, rvalue); // 属性
+      				if (obj instanceof String) { // 对字符串的判断需要改进
+      					c = Class.forName(obj.toString());
+      					c.getField(((Dot)pe.postfix(0)).name()).set(c, rvalue); // 属性
       				} else {
-      					c = t.getClass();
-      					c.getField(((Dot)p.postfix(0)).name()).set(t, rvalue); // 属性
+      					c = obj.getClass();
+      					c.getField(((Dot)pe.postfix(0)).name()).set(obj, rvalue); // 属性
       				}
       				return c; 
       			} catch(Exception e) {
       				return null;
       			}
   				}
-  			} else if (p.hasPostfix(0) && p.postfix(0) instanceof ArrayRef) { // 数组
-  				Object a = ((PrimaryExpression) l).evalSub(env, 1);
-  				if (a instanceof Object[]) {
-  					ArrayRef aref = (ArrayRef) p.postfix(0);
+  			} else if (pe.hasPostfix(0) && pe.postfix(0) instanceof ArrayRef) { // 数组
+  				Object obj = pe.evalSub(env, 1);
+  				if (obj instanceof Object[]) {
+  					ArrayRef aref = (ArrayRef) pe.postfix(0);
   					Object index = aref.index().eval(env);
   					if (index instanceof Integer) {
-  						((Object[]) a)[(Integer) index] = rvalue;
+  						((Object[]) obj)[(Integer) index] = rvalue;
   						return rvalue;
   					}
   				}
   				throw new KsException("数组出错", this);
   			}
   			throw new KsException("错误的表达式", this);
-  		} else if (l instanceof Name) {
+  		} /*else if (l instanceof Name) {
   			env.put(((Name) l).name(), rvalue);
   			return rvalue;
-  		} else
+  		} */else {
   			throw new KsException("错误的表达式", this);
+  		}
     	
     }
 	}
@@ -178,7 +168,7 @@ public class BinaryExpression extends ASTList {
 		// System.out.println("BinaryExpression");  // test
 		
 		String op = operator();
-		// System.out.println("op:" + op); // test
+		// System.out.println("op:" + op);
 		if ("=".equals(op)) {
 			// left().compile(env, bcOp);
 			if (left() instanceof Name) {
@@ -197,28 +187,66 @@ public class BinaryExpression extends ASTList {
 						n.compileLeft(env, bcOp, obj);
 					}
 				}
+			} else if (left() instanceof PrimaryExpression) { 
+				PrimaryExpression pe = (PrimaryExpression) left();
+				if (pe.hasPostfix(0) && pe.postfix(0) instanceof Dot) { // 类属性
+					
+					Object objl = pe.compileSub(env, bcOp, 1);
+					
+					Object objr = right().compile(env, bcOp);
+					VarType rightType = null;
+					if (objr instanceof VarType) {
+						rightType = (VarType)objr;
+					} else {
+						throw new KsException("不支持的类型", this);
+					}
+					
+					if (objl instanceof VarType) {
+						VarType leftType = (VarType)objl;
+						if(leftType.isJavaObject()) { // java对象
+							String name = ((Dot)pe.postfix(0)).name();
+							String className = leftType.getJavaClass().getName().replaceAll("[.]", "/");
+							if(BcGenerator.isValueType(rightType)) {
+								leftType = BcGenerator.toWrapperType(rightType, bcOp);
+							} else {
+								leftType = (VarType)rightType;
+							}
+							bcOp.setField(className, name, "Ljava/lang/Object;"); // BcGenerator.getClassType(leftType.getJavaClass())
+						}
+  				}  else {
+  					throw new KsException("不支持的类型", this);
+  				}
+				} else {
+					throw new KsException("错误的表达式", this);
+				}
 			} else {
 				right().compile(env, bcOp);
 			}
 			
 		} else {
-			// System.out.println(left().getClass()); // test
-			// System.out.println(right().getClass()); // test
-			if (op.equals("+")) {
-				return BcGenerator.plus(left(), right(), env, bcOp);
-			} else if (op.equals("-")) {
-				return BcGenerator.minus(left(), right(),env, bcOp);
-			} else if (op.equals("*")) {
-				return BcGenerator.multiply(left(), right(), env, bcOp);
-			} else if (op.equals("/")) {
-				return BcGenerator.divide(left(), right(), env, bcOp);
-			} else if (op.equals("%")) {
-				return BcGenerator.mod(left(), right(), env, bcOp);
-			} else if (op.equals("==") || op.equals("&&") || op.equals("||") 
-					|| op.equals("<") || op.equals(">") || op.equals("<=") || op.equals(">=")
-					|| op.equals("!=")) {
-				return BcGenerator.compare(left(), right(), op, env, bcOp);
-			} 
+			switch(op) {
+				case "+":
+					return BcGenerator.plus(left(), right(), env, bcOp);
+				case "-":
+					return BcGenerator.minus(left(), right(),env, bcOp);
+				case "*":
+					return BcGenerator.multiply(left(), right(), env, bcOp);
+				case "/":
+					return BcGenerator.divide(left(), right(), env, bcOp);
+				case "%":
+					return BcGenerator.mod(left(), right(), env, bcOp);
+				case "==":
+				case "!=":
+				case "&&":
+				case ">":
+				case "<":
+				case ">=":
+				case "<=":
+				case "<=>":
+					return BcGenerator.compare(left(), right(), op, env, bcOp);
+				default:
+					throw new KsException("错误的运算符", this);
+			}
 		}
 		return null;
 	}

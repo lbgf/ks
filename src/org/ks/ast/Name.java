@@ -105,11 +105,10 @@ public class Name extends ASTLeaf {
 	}
 	
 	public Object compile(Environment env, BcOpcodes bcOp) {
-		//System.out.println("Name"); // test
+		// System.out.println("Name"); // test
 		
-		/*System.out.println("关键字：" + name() + " 所属空间：" + nest + " 索引号：" + index 
-				+ " 类型：" + env.getType(nest, index) + " 变量：" + env.get(nest, index) + " bc索引号:" + bcIndex);  // test
-		*/
+		// showMsg(env);  // test
+		
 		
 		if (env.get(nest, index) != null) {
 			
@@ -141,7 +140,6 @@ public class Name extends ASTLeaf {
 			}
 			return env.get(nest, index);
 		} else if (nest == MemberSymbols.FIELD) {
-			
 			
 		} else if (nest == MemberSymbols.METHOD) {
 			
@@ -176,10 +174,8 @@ public class Name extends ASTLeaf {
 		if(env.get(nest, index) == null) {
 			
 			if (nest == MemberSymbols.FIELD) { // 字段
+				// showMsg(env);  // test
 				
-				/*System.out.println("关键字：" + name() + " 所属空间：" + nest + " 索引号：" + index 
-						+ " 类型：" + env.getType(nest, index) + " 变量：" + env.get(nest, index) + " bc索引号:" + bcIndex);
-				*/
 				bcOp.createField(BcOpcodes.ACC_PUBLIC, name(), "Ljava/lang/Object;", null, null);
 				String className = "Script" +env.getSubScriptName().replaceAll("[.]", "/");
 				if (right instanceof VarType) {
@@ -201,10 +197,9 @@ public class Name extends ASTLeaf {
 				}
 				env.put(nest, index, leftType);
 				env.putType(nest, index, leftType);
-							
-				/*System.out.println("关键字：" + name() + " 所属空间：" + nest + " 索引号：" + index 
-						+ " 类型：" + env.getType(nest, index) + " 变量：" + env.get(nest, index) + " bc索引号:" + bcIndex);  // test
-				*/
+				
+				// showMsg(env);  // test
+				
 				bcOp.gcMethod().visitVarInsn(BcGenerator.getOpsType(leftType), bcIndex);
 				// 如果是新变量生成局部变量表，但貌似没有这个也没问题...!^_^
 				// {}区间内不能需要生成局部变量表，方法体除外
@@ -252,9 +247,8 @@ public class Name extends ASTLeaf {
 				return type;
 			}
 		} else {
-			/*System.out.println("关键字：" + name() + " 所属空间：" + nest + " 索引号：" + index 
-					+ " 类型：" + env.getType(nest, index) + " 变量：" + env.get(nest, index) + " bc索引号:" + bcIndex);  // test
-			*/
+			// showMsg(env);  // test
+			
 			if (env.get(nest, index) instanceof VarType) {
 				leftType = (VarType)env.get(nest, index);
 
@@ -277,11 +271,22 @@ public class Name extends ASTLeaf {
 				return type;
 			}
 			
-			
 		}
 		
 		return leftType;
 		
+	}
+	
+	// 只用于调试
+	protected void showMsg(Environment env) {
+		System.out.println("------------------------" );
+		System.out.println("关键字：" + name());
+		System.out.println("所属空间：" + nest);
+		System.out.println("索引号：" + index);
+		System.out.println("类型：" + env.getType(nest, index));
+		System.out.println("变量：" + env.get(nest, index));
+		System.out.println("bc索引号:" + bcIndex);
+		System.out.println("------------------------" );
 	}
 	
 }

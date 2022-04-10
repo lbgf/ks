@@ -9,7 +9,10 @@
 
 package org.ks.core;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -53,8 +56,28 @@ public class KsRunner {
 	 * @param lps List<LanguagePkg>: 语言包.
 	 */
 	public KsRunner(String code, List<LanguagePkg> lps) {
-		this(code, lps, Constant.DV);
+		initRunner(code, lps, Constant.DV);
 		this.scriptName = String.valueOf(ThreadLocalRandom.current().nextLong(10000));
+	}
+	
+	/**
+	 * 构造函数.
+	 * 
+	 * @param f File: 脚本文件.
+	 * @param lps List<LanguagePkg>: 语言包.
+	 */
+	public KsRunner(File f, List<LanguagePkg> lps) throws Exception {
+		LineNumberReader r = new LineNumberReader(new FileReader(f));
+		String scriptName = f.getName().split("[.]")[f.getName().split("[.]").length - 2];
+		String str = null;
+		String code = "";
+    while ((str = r.readLine()) != null) {
+    	code += str + "\n";
+    }
+    r.close();
+		initRunner(code, lps, Constant.DV);
+		this.scriptName = scriptName;
+		ksEnv.setScriptRootPath(f.getParent());
 	}
 	
 	/**
@@ -66,11 +89,37 @@ public class KsRunner {
 	 * @param saveClassPath String: 把生成的字节码保存到文件（null时不保存）.
 	 */
 	public KsRunner(String code, List<LanguagePkg> lps, String scriptName, String saveClassPath) {
-		this(code, lps, Constant.BC);
+		initRunner(code, lps, Constant.BC);
 		this.scriptName = scriptName;
 		this.saveClassPath = saveClassPath;
 		ksEnv.setScriptName(this.scriptName);
 		ksEnv.setSaveClassPath(this.saveClassPath);
+	}
+	
+	/**
+	 * 构造函数.
+	 * 
+	 * @param f File: 脚本文件.
+	 * @param lps List<LanguagePkg>: 语言包.
+	 * @param scriptName String: 脚本名称.
+	 * @param saveClassPath String: 把生成的字节码保存到文件（null时不保存）.
+	 */
+	public KsRunner(File f, List<LanguagePkg> lps, String saveClassPath) throws Exception  {
+		LineNumberReader r = new LineNumberReader(new FileReader(f));
+		String scriptName = f.getName().split("[.]")[f.getName().split("[.]").length - 2];
+		String str = null;
+		String code = "";
+    while ((str = r.readLine()) != null) {
+    	code += str + "\n";
+    }
+    r.close();
+		
+		initRunner(code, lps, Constant.BC);
+		this.scriptName = scriptName;
+		this.saveClassPath = saveClassPath;
+		ksEnv.setScriptName(this.scriptName);
+		ksEnv.setSaveClassPath(this.saveClassPath);
+		ksEnv.setScriptRootPath(f.getParent());
 	}
 	
 	/**
@@ -81,6 +130,17 @@ public class KsRunner {
 	 * @param runWay byte: 运行方式.
 	 */
 	public KsRunner(String code, List<LanguagePkg> lps, byte runWay) {
+		initRunner(code, lps, runWay);
+	}
+	
+	/**
+	 * 初始化运行器.
+	 * 
+	 * @param code String: 代码.
+	 * @param lps List<LanguagePkg>: 语言包.
+	 * @param runWay byte: 运行方式.
+	 */
+	protected void initRunner(String code, List<LanguagePkg> lps, byte runWay) {
 		RUN_WAY = runWay;
 
 		this.code = code;

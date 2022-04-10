@@ -15,7 +15,9 @@ package org.ks.util;
 public final class SysUtil {
 	
 	public final static String TITLE = "KS";
-	public final static String VERSION = "v0.7.18";
+	public final static String EN = "kid script";
+	public final static String CN = "赤子脚本语言";
+	public final static String VERSION = "v0.7.19";
 
 	/**
 	 * 构造函数.

@@ -82,6 +82,10 @@ public interface Environment {
 
 	public void setMethodEnvironment(boolean isMethodEnvironment);
 	
+	public String getScriptRootPath();
+	
+	public void setScriptRootPath(String saveClassPath);
+	
 	public String getSaveClassPath();
 	
 	public void setSaveClassPath(String saveClassPath);

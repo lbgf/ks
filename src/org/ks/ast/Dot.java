@@ -98,20 +98,9 @@ public class Dot extends Postfix {
     		throw new KsException(e.getMessage(), this);
     	}
     }
-    	/*else { if (value instanceof OptKsObject) {
-        try {
-            return ((OptKsObject)value).read(member);
-        } catch (AccessException e) {}
-    }*/
+
     throw new KsException("不是成员函数: " + member, this);
 	}
-	
-	/*protected void initObject(KsClassInfo ci, KsObject obj,
-	                          Environment env) {
-	    if (ci.superClass() != null)
-	        initObject(ci.superClass(), obj, env);
-	    ci.body().eval(env);
-	}*/
 	
 	protected void updateCache(KsObject target) {
     String member = name();
@@ -211,9 +200,9 @@ public class Dot extends Postfix {
 			} else if (type.isThis()) { // this指针
 				
 				String className = "Script" + env.getSubScriptName().replaceAll("[.]", "/");
-				bcOp.getField(className, member, "Ljava/lang/Object;");
+				bcOp.getField(className, member, "Ljava/lang/Object;");				
+				return new JavaKsObject(Object.class, member);
 				
-				return null;
 			} else {
 				System.out.println("暂时不能识别的类型");
 				return null;

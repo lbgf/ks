@@ -41,13 +41,15 @@ public class KsEnvironment implements Environment, Cloneable {
 	
 	protected HashMap<String, Object> bcValues;
 	
-	protected String scriptName;
+	protected String scriptName; // 脚本类名
 	protected String subScriptName; // 脚本中的类名
 	protected boolean isMethodEnvironment = false;
 	
-	protected String saveClassPath;
+	protected String scriptRootPath; // 脚本根目录
 	
-	protected KsClassLoader loader;
+	protected String saveClassPath;  // 保存类的目录
+	
+	protected KsClassLoader loader; // 类加载器
 	
 	protected List<Object> frameObjs;
 
@@ -340,6 +342,20 @@ public class KsEnvironment implements Environment, Cloneable {
 
 	public void setMethodEnvironment(boolean isMethodEnvironment) {
 		this.isMethodEnvironment = isMethodEnvironment;
+	}
+	
+	public String getScriptRootPath() {
+		if(outer != null) {
+			this.outer.getScriptRootPath();
+		}
+		return scriptRootPath;
+	}
+	
+	public void setScriptRootPath(String scriptRootPath) {
+		if(outer != null) {
+			this.outer.setScriptRootPath(scriptRootPath);
+		}
+		this.scriptRootPath =  scriptRootPath;
 	}
 	
 	public String getSaveClassPath() {

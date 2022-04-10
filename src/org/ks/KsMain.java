@@ -10,8 +10,6 @@
 package org.ks;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.LineNumberReader;
 
 import org.ks.core.Constant;
 import org.ks.core.KsRunner;
@@ -20,7 +18,7 @@ import org.ks.util.KsDebug;
 import org.ks.util.SysUtil;
 
 /**
- * 主类.
+ * 命令行主类.
  *
  */
 public class KsMain {
@@ -39,18 +37,9 @@ public class KsMain {
 				System.out.println("-a 可查看代码生成的语法树");
 				System.out.println("-sc 保存类路径，可查看代码生成的java类");
 			} else if (args.length >= 1 && args[0].equals("-v")) {
-				System.out.println("小伙子脚本引擎(ks)" + SysUtil.VERSION + "版"); // kid script
+				System.out.println(SysUtil.CN + "(" + SysUtil.EN + ")" + SysUtil.VERSION + "版"); // kid script
 			} else {
 				File f = new File(args[0]);
-				LineNumberReader r = new LineNumberReader(new FileReader(f));
-				String scriptName = f.getName().split("[.]")[f.getName().split("[.]").length - 2];
-				
-				String str = null;
-				String code = "";
-		    while ((str = r.readLine()) != null) {
-		    	code += str + "\n";
-		    }
-		    r.close();
 		    
 		    int mode = Constant.DV;
 		    String savePath = null;
@@ -68,14 +57,14 @@ public class KsMain {
 		    }
 		    
 		    if (KsDebug.showAst) {
-		    	AstView av = new AstView(code, null);
+		    	AstView av = new AstView(f, null);
 		  		av.show();
 		    } else {
 		    	KsRunner kr = null;
 		    	if (mode == Constant.BC) {
-		    		kr = new KsRunner(code, null, scriptName, savePath);
+		    		kr = new KsRunner(f, null, savePath);
 		    	} else {
-		    		kr = new KsRunner(code, null);
+		    		kr = new KsRunner(f, null);
 		    	}
 			    kr.exec();
 		    }

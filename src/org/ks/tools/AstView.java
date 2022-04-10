@@ -39,19 +39,53 @@ import org.ks.plugin.language.LanguagePkgCn;
 import org.ks.plugin.language.LanguagePkgEn;
 
 import java.awt.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
 public class AstView {
 
-	protected String version = "v0.5.0";
+	protected String version = "v0.5.1";
 	protected String code = "";
 	protected KsLexer kl = null;
 	protected KsParser kp = null;
 	public static List<LanguagePkg> GLPS;
 
+	/**
+	 * 构造函数.
+	 * 
+	 * @param code String: 代码.
+	 * @param lps List<LanguagePkg>: 语言包.
+	 */
 	public AstView(String code, List<LanguagePkg> lps) {
+		this.code = code;
+		if (lps == null) {
+			lps = new ArrayList<LanguagePkg>();
+			lps.add(new LanguagePkgEn());
+			lps.add(new LanguagePkgCn());
+		}
+		this.GLPS = lps;
+		kl = new KsLexer(code);
+		kp = new KsParser(lps);
+	}
+	
+	/**
+	 * 构造函数.
+	 * 
+	 * @param f File: 脚本文件.
+	 * @param lps List<LanguagePkg>: 语言包.
+	 */
+	public AstView(File f, List<LanguagePkg> lps) throws Exception {
+		LineNumberReader r = new LineNumberReader(new FileReader(f));
+		String str = null;
+		String code = "";
+    while ((str = r.readLine()) != null) {
+    	code += str + "\n";
+    }
+    r.close();
 		this.code = code;
 		if (lps == null) {
 			lps = new ArrayList<LanguagePkg>();

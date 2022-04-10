@@ -1,8 +1,7 @@
 
 package demo.astview;
 
-import java.io.FileReader;
-import java.io.LineNumberReader;
+import java.io.File;
 
 import org.ks.tools.AstView;
 
@@ -10,16 +9,9 @@ public class TestAstView {
 	
 	public static void main(String[] args) throws Exception {
 
-		LineNumberReader r = new LineNumberReader(new FileReader(System.getProperty("user.dir") + "\\src\\demo\\astview\\demo.ks"));
-
-		String str = null;
-		String code = "";
-		while ((str = r.readLine()) != null) {
-			code += str + "\n";
-		}
-		r.close();
+		File f = new File(System.getProperty("user.dir") + "\\src\\demo\\astview\\demo.ks");
 		 
-		AstView av = new AstView(code, null);
+		AstView av = new AstView(f, null);
 		av.show();
 	}
 

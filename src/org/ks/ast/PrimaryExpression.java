@@ -65,7 +65,7 @@ public class PrimaryExpression extends ASTList {
 			// System.out.println("1:" + postfix(nest).getClass());
 			return postfix(nest).compile(env, bcOp, target);
 		} else {
-			//System.out.println("2:" + operand().getClass());
+			// System.out.println("2:" + operand().getClass());
 			return operand().compile(env, bcOp);
 		}
 	}

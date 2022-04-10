@@ -1,7 +1,6 @@
 package demo.language;
 
-import java.io.FileReader;
-import java.io.LineNumberReader;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +17,7 @@ public class TestLanguage {
 
 	public static void main(String[] args) throws Exception {
 
-		LineNumberReader r = new LineNumberReader(new FileReader(System.getProperty("user.dir") + "\\src\\demo\\language\\demo.ks"));
-
-		String str = null;
-		String code = "";
-		while ((str = r.readLine()) != null) {
-			code += str + "\n";
-		}
-		r.close();
+		File f = new File(System.getProperty("user.dir") + "\\src\\demo\\language\\demo.ks");
 		
 		KsDebug.showProcess = false;
 		KsRegex.extLanguageRegx("\\p{script=Hira}\\p{script=Kana}");
@@ -34,7 +26,7 @@ public class TestLanguage {
 		lps.add(new LanguagePkgCn());
 		lps.add(new LanguagePkgJp());
 		
-		KsRunner kr = new KsRunner(code, lps);
+		KsRunner kr = new KsRunner(f, lps);
 		kr.exec();
 	}
 

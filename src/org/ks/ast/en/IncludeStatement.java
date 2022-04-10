@@ -55,12 +55,19 @@ public class IncludeStatement extends ASTList {
 	public Object eval(Environment env) {
 		
 		String name = name();
-		File directory = new File("");
-		// System.out.println(directory.getAbsolutePath()); // test
+		String path = "";
+		
+		
+		
+		if (env.getScriptRootPath() != null) {
+			path = env.getScriptRootPath();
+		} else {
+			path = new File("").getAbsolutePath();
+		}
 		
 		// 执行外部脚本
 		try {
-			LineNumberReader r = new LineNumberReader(new FileReader(directory.getAbsolutePath() + "/" + name));
+			LineNumberReader r = new LineNumberReader(new FileReader(path + "/" + name));
 			String str = null;
 			String code = "";
 	    while ((str = r.readLine()) != null) {

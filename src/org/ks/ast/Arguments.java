@@ -254,7 +254,6 @@ public class Arguments extends Postfix {
 
 			for (ASTNode a : this) {
 				Object obj = a.compile(env, bcOp);
-				
 				if (obj instanceof VarType) { // to do 参数匹配
 					if(BcGenerator.isValueType((VarType)obj)) {
 						BcGenerator.toWrapperType((VarType)obj, bcOp);
@@ -353,8 +352,10 @@ public class Arguments extends Postfix {
 					throw new KsException("不能识别的参数类型", this);
 				} else if (obj instanceof VarType) {
 					// params = params + BytecodeUtil.getBcType((VarType)obj);
-				} else { // to do 有可能是个class
-					throw new KsException("不能识别的参数类型", this);
+				} else if (obj instanceof JavaKsObject) { 
+					
+				} else { // to do 有可能是其他类型
+					// throw new KsException("不能识别的参数类型", this);
 				}
 			}
 			
@@ -378,7 +379,13 @@ public class Arguments extends Postfix {
 								argIn[i] = p; //((VarType)valuesIn[i]).getJavaClass();
 								params = params + BcGenerator.getBcType(new VarType(p));
 							}
-						} else { // to do 有可能是个class
+						} else if (valuesIn[i] instanceof JavaKsObject) {
+							// 找出匹配参数的函数
+							if(p.isAssignableFrom(((JavaKsObject)valuesIn[i]).getJavaClass())) {
+								argIn[i] = p; //((VarType)valuesIn[i]).getJavaClass();
+								params = params + BcGenerator.getBcType(new VarType(p));
+							}
+						} else { // to do 有可能是其他类型
 							throw new KsException("不能识别的类型", this);
 						}
 						i++;
@@ -468,7 +475,9 @@ public class Arguments extends Postfix {
 					throw new KsException("不能识别的参数类型", this);
 				} else if (obj instanceof VarType) {
 					// params = params + BytecodeUtil.getBcType((VarType)obj);
-				} else { // to do 有可能是个class
+				} else if (obj instanceof JavaKsObject) { 
+					
+				} else { // to do 有可能其他类型
 					throw new KsException("不能识别的参数类型", this);
 				}
 			}
@@ -493,7 +502,13 @@ public class Arguments extends Postfix {
 								argIn[i] = p; 
 								params = params + BcGenerator.getBcType(new VarType(p));
 							}
-						} else { // to do 有可能是个class
+						} else if (valuesIn[i] instanceof JavaKsObject) {
+							// 找出匹配参数的函数
+							if(p.isAssignableFrom(((JavaKsObject)valuesIn[i]).getJavaClass())) {
+								argIn[i] = p; //((VarType)valuesIn[i]).getJavaClass();
+								params = params + BcGenerator.getBcType(new VarType(p));
+							}
+						} else { // to do 有可能其他类型
 							throw new KsException("不能识别的类型", this);
 						}
 						i++;

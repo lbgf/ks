@@ -1,7 +1,6 @@
 package demo.perf;
 
-import java.io.FileReader;
-import java.io.LineNumberReader;
+import java.io.File;
 
 import org.ks.core.KsRunner;
 import org.ks.util.KsDebug;
@@ -10,17 +9,10 @@ public class PerfDV {
 
 	public static void main(String[] args) throws Exception {
 
-		LineNumberReader r = new LineNumberReader(new FileReader(System.getProperty("user.dir") + "\\src\\demo\\perf\\dv.ks"));
-
-		String str = null;
-		String code = "";
-		while ((str = r.readLine()) != null) {
-			code += str + "\n";
-		}
-		r.close();
+		File f = new File(System.getProperty("user.dir") + "\\src\\demo\\perf\\dv.ks");
 		
 		KsDebug.showProcess = false;
-		KsRunner kr = new KsRunner(code, null);
+		KsRunner kr = new KsRunner(f, null);
 		kr.exec();
 	}
 
