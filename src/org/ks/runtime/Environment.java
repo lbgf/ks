@@ -12,6 +12,7 @@ package org.ks.runtime;
 import java.util.HashMap;
 import java.util.List;
 
+import org.ks.bc.StackMapFrames;
 import org.ks.core.KsClassLoader;
 import org.ks.core.ListStack;
 import org.objectweb.asm.Label;
@@ -98,11 +99,17 @@ public interface Environment {
 	
 	public KsClassLoader getKsClassLoader();
 	
-	public void initFrameObjs();
+	public void initSmf();
+	
+	public void initSmf(StackMapFrames smf);
+	
+	public StackMapFrames getSmf();
 	
 	public List<Object> getFrameObjs();
 	
-	public void putFrameObjs(Object value);
+	public void putFrameObjs(List<Object> objList);
+	
+	public void putFrameObj(Object value);
 	
 	public void clearFrameObjs();
 	

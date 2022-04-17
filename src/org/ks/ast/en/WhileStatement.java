@@ -62,15 +62,18 @@ public class WhileStatement extends ASTList {
 		env.getBcBreakList().push(l1);
 		Label l2 = new Label();
 		env.getBcContinueList().push(l2);
-		/*
-		由于引起VerifyError异常，需要进行frame设置，但是还没有处理好变量的index问题，目前跳跃太大，因此先不处理这里，运行时加参数-noverify跳过jvm验证
-		if (env.getFrameObjs().size() > 0) {
-			bcOp.gcMethod().visitFrame(BcOpcodes.F_APPEND, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, null);
-			env.clearFrameObjs();
+		
+		// 处理java.lang.VerifyError问题
+		// 由于引起VerifyError异常，需要进行frame设置，运行时加参数-noverify跳过jvm验证
+		// System.out.println("while,," + env.getFrameObjs() + "," + env.getSmf().getNewSize() + "," + env.getSmf().getOldSize());
+		if (env.getSmf().getNewSize() > env.getSmf().getOldSize()) {
+			env.getSmf().syncSize();
+			bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
 		} else {
 			bcOp.gcMethod().visitFrame(BcOpcodes.F_SAME, 0, null, 0, null);
 		}
-		*/
+		//
+		
 		bcOp.gcMethod().visitLabel(l2);
 		condition().compile(env, bcOp);
 		bcOp.gcMethod().visitJumpInsn(BcOpcodes.IFEQ, l1);
@@ -78,7 +81,13 @@ public class WhileStatement extends ASTList {
     bcOp.gcMethod().visitJumpInsn(BcOpcodes.GOTO, l2);
     bcOp.gcMethod().visitLabel(l1);
     
-    // bcOp.gcMethod().visitFrame(BcOpcodes.F_SAME, 0, null, 0, null);
+    // 处理java.lang.VerifyError问题
+    bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
+    // 加一个什么都不做的方法，临时避开frame设置同一行的冲突
+    bcOp.getThis();
+		bcOp.invokeVirtual("org/ks/bc/ScriptBase", "doNothing", "", "V", false);
+    //
+		//
     
     env.getBcContinueList().pop();
     env.getBcBreakList().pop();

@@ -84,6 +84,12 @@ public class FuncStatement extends ASTList {
 		KsFunction kf = new KsFunction(parameters(), body(), env, size, name());
 		env.put(0, index, kf);
 		Environment newEnv = kf.makeEnv();
+		
+		// 处理java.lang.VerifyError问题
+		newEnv.initSmf();
+		newEnv.putFrameObj(newEnv.getSubScriptName() == null?"Script" + newEnv.getScriptName():"Script"+newEnv.getSubScriptName());
+  	//
+		
 		bcOp.createMethod(BcOpcodes.ACC_PUBLIC, name(), parameters().getParamsType(), parameters().getReturnType());
 		parameters().compile(newEnv, bcOp);
   	bcOp.gcMethod().visitCode();

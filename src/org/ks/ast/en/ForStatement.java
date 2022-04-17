@@ -76,6 +76,16 @@ public class ForStatement extends ASTList {
 		Label l3 = bcOp.createLabel();
 		env.getBcContinueList().push(l3);
 		initializer().compile(env, bcOp);
+		
+		// 处理java.lang.VerifyError问题
+		if (env.getSmf().getNewSize() > env.getSmf().getOldSize()) {
+			env.getSmf().syncSize();
+			bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
+		} else {
+			bcOp.gcMethod().visitFrame(BcOpcodes.F_SAME, 0, null, 0, null);
+		}
+		//
+		
 		bcOp.gcMethod().visitLabel(l2);
 		condition().compile(env, bcOp);
 		bcOp.gcMethod().visitJumpInsn(BcOpcodes.IFEQ, l1);
@@ -84,6 +94,15 @@ public class ForStatement extends ASTList {
     incremental().compile(env, bcOp);
     bcOp.gcMethod().visitJumpInsn(BcOpcodes.GOTO, l2);
     bcOp.gcMethod().visitLabel(l1);
+    
+    // 处理java.lang.VerifyError问题
+    bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
+    // 加一个什么都不做的方法，临时避开frame设置同一行的冲突
+    bcOp.getThis();
+		bcOp.invokeVirtual("org/ks/bc/ScriptBase", "doNothing", "", "V", false);
+    //
+    //
+    
     env.getBcContinueList().pop();
     env.getBcBreakList().pop();
     

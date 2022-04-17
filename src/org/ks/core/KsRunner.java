@@ -148,7 +148,7 @@ public class KsRunner {
 		if (runWay == Constant.BC) {
 			ksEnv.initBcFristEnv();
 			ksEnv.setKsClassLoader(new KsClassLoader());
-			ksEnv.initFrameObjs();
+			ksEnv.initSmf();
 		} else {
 			ksEnv.initFristEnv();
 		}
@@ -258,6 +258,10 @@ public class KsRunner {
     	bcOp = new BcOpcodes();
     	String className = "Script" + scriptName;
     	bcOp.createClass(className);
+    	
+    	// 处理java.lang.VerifyError问题
+    	env.putFrameObj(className);
+    	//
     	
     	// 环境属性
     	// bcOp.createField(Opcodes.ACC_PRIVATE, "env", "Lorg/ks/runtime/Environment;", null, null);

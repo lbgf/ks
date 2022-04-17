@@ -145,6 +145,12 @@ public class BcOpcodes implements Opcodes {
 		return new Label();
 	}
 	
+	public Label createAndVisitLabel() {
+		Label label = new Label();
+		gcMethod().visitLabel(label);
+		return label;
+	}
+	
 	public byte[] getByteCode() {
 		return code;
 	}

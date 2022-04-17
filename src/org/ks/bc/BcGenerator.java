@@ -348,7 +348,8 @@ public class BcGenerator  {
 	
 	public static String getBcType(VarType type) {
 		if (type == null || type.getJavaClass() == null) {
-			return "V";
+			// return "V";
+			return "Ljava/lang/Object;";
 		}
 
 		if (type.getJavaClass().isAssignableFrom(int.class)) {
@@ -612,6 +613,26 @@ public class BcGenerator  {
 			type = "L" + c.getName().replaceAll("[.]", "/")+";";
 		} // to do: 继续加
 		return type;
+
+	}
+	
+	public static Object getClassType2(Class<?> c) {
+		if (c == null) {
+			return BcOpcodes.NULL;
+		}
+		if (c.isAssignableFrom(int.class)) {
+			return BcOpcodes.INTEGER;
+		} else if (c.isAssignableFrom(long.class)) {
+			return BcOpcodes.LONG;
+		} else if (c.isAssignableFrom(boolean.class)) {
+			return BcOpcodes.INTEGER;
+		} else if (c.isAssignableFrom(float.class)) {
+			return BcOpcodes.FLOAT;
+		} else if (c.isAssignableFrom(double.class)) {
+			return BcOpcodes.DOUBLE;
+		} else {
+			return c.getName().replaceAll("[.]", "/");
+		} // to do: 继续加
 
 	}
 

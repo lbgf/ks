@@ -336,7 +336,7 @@ public class Arguments extends Postfix {
 			
 		} else if (value instanceof JavaKsObject) { // 执行java对象函数
 			JavaKsObject jko = (JavaKsObject)value;
-						
+									
 			Class<?> realClass = (Class<?>)jko.getObject();
 			String className = realClass.getName().replaceAll("[.]", "/");
 			
@@ -416,7 +416,7 @@ public class Arguments extends Postfix {
 						returnValue = "V";
 					} else {
 						returnValue = "L"+method.getGenericReturnType().getTypeName().replaceAll("[.]", "/")+";";
-						returnType = new VarType(JavaUtil.getParamType(method.getReturnType()));
+						returnType = new VarType(method.getReturnType());
 						returnType.setJavaObject(true);
 					}
 				}
@@ -539,7 +539,7 @@ public class Arguments extends Postfix {
 						returnValue = "V";
 					} else {
 						returnValue = "L"+method.getGenericReturnType().getTypeName().replaceAll("[.]", "/")+";";
-						returnType = new VarType(JavaUtil.getParamType(method.getReturnType()));
+						returnType = new VarType(method.getReturnType());
 						returnType.setJavaObject(true);
 					}
 				}

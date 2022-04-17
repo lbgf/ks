@@ -115,16 +115,23 @@ public class VarStatement extends ASTList {
 			
 			env.put(0, index, type);
 			env.putType(0, index, type); // 保存变量的类型
-			
+						
 			bcOp.gcMethod().visitVarInsn(BcGenerator.getOpsType(type), bcIndex);
 			// {}区间内不能需要生成局部变量表（nest > 0 or env.getOuter() == null）
+			/*
 			if (env.getOuter() == null) {
 				bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 			} else if (env.getOuter() != null && env.getOuter().isMethodEnvironment()) {
 				bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 			}
+			*/
+
+			bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createAndVisitLabel(), bcOp.createAndVisitLabel(), bcIndex);
 			
-			// env.putFrameObjs(type.getJavaClass().getName().replaceAll("[.]", "/"));
+			// 处理java.lang.VerifyError问题
+			env.putFrameObj(BcGenerator.getClassType2(type.getJavaClass()));
+			// 
+			
 		} else if (value instanceof JavaKsStaticClass) {
 			JavaKsStaticClass jksc = (JavaKsStaticClass)value;
 						
@@ -135,12 +142,20 @@ public class VarStatement extends ASTList {
 			env.putType(0, index, type); // 保存变量的类型
 			
 			bcOp.gcMethod().visitVarInsn(BcGenerator.getOpsType(type), bcIndex);
-
+			
+			/*
 			if (env.getOuter() == null) {
 				bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 			} else if (env.getOuter() != null && env.getOuter().isMethodEnvironment()) {
 				bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 			}
+			*/
+
+			bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createAndVisitLabel(), bcOp.createAndVisitLabel(), bcIndex);
+			
+			// 处理java.lang.VerifyError问题
+			env.putFrameObj(BcGenerator.getClassType2(type.getJavaClass()));
+			// 
 			
 			return type;
 		} else if (value instanceof JavaKsObject) {
@@ -154,11 +169,18 @@ public class VarStatement extends ASTList {
 			
 			bcOp.gcMethod().visitVarInsn(BcGenerator.getOpsType(type), bcIndex);
 
+			/*
 			if (env.getOuter() == null) {
 				bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 			} else if (env.getOuter() != null && env.getOuter().isMethodEnvironment()) {
 				bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 			}
+			*/
+
+			bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createAndVisitLabel(), bcOp.createAndVisitLabel(), bcIndex);
+			// 处理java.lang.VerifyError问题
+			env.putFrameObj(BcGenerator.getClassType2(type.getJavaClass()));
+			// 
 			
 			return type;
 		} else {
@@ -167,6 +189,18 @@ public class VarStatement extends ASTList {
 		
 		//
 		return value;
+	}
+	
+	// 只用于调试
+	protected void showMsg(Environment env) {
+		System.out.println("------------------------" );
+		System.out.println("关键字：" + name());
+		System.out.println("所属空间：" + nest);
+		System.out.println("索引号：" + index);
+		System.out.println("类型：" + env.getType(nest, index));
+		System.out.println("变量：" + env.get(nest, index));
+		System.out.println("bc索引号:" + bcIndex);
+		System.out.println("------------------------" );
 	}
 
 }

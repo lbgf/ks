@@ -1,10 +1,10 @@
 # ks
 
 #### 介绍
-基于jvm的可用中文编写的脚本语言（中文：赤子脚本语言、英文：kid script），也可扩展第三方语系 [快速体验](#setup目录说明)
+基于jvm的可用中文编写的脚本语言（中文：赤子脚本语言、英文：kid script），也可扩展第三方语系(demo中有一个扩展日语的例子) [快速体验](#setup目录说明)
 
 #### 版本
-v0.7.19
+v0.7.20
 
 #### 运行环境
 jdk1.8
@@ -48,12 +48,24 @@ jdk1.8
 System.out.println(列表1.size());
 ```
 
+4.扩展个性化的语言(下面是一个日语的例子，参考demo中的language目录)
+
+```
+クラス クラス1 {
+	機能 テスト() {
+		印刷 "クラス1-->ccccc";
+	}
+}
+変数 オブジェクト1 = 新しい クラス1();
+オブジェクト1.テスト();
+```
+
 #### 性能测式
-在demo/perf目录下有三个不同情况的测试用例，主要是执行1亿次加法运算，以i7的8代cpu为准，DV模式执行时间大概10秒，BC模式执行时间大概0.8秒，BC定义值类型模式执行时间大概0.2秒；具体跳转 [demo](#demo目录说明)
+在demo/perf目录下有三个不同情况的测试用例，主要是执行1亿次加法运算，以i7的8代cpu为准，**DV模式**执行时间大概**10**秒，**BC模式**执行时间大概**0.8**秒，**BC定义值类型模式**执行时间大概**0.2**秒；具体跳转 [demo](#demo目录说明)
 
 #### 使用说明
 
-脚本引擎的执行方式分解释（DV）和编译（BC）两种，其中BC会生成java字节码（$\color{#FF0000}{注:如运行中报java.lang.VerifyError，可以加入vm参数-noverify后再运行}$），默认使用解释执行；
+脚本引擎的执行方式分解释（DV）和编译（BC）两种，其中BC会生成java字节码，默认使用解释执行；
 
 DV的使用：
 
@@ -416,7 +428,11 @@ kr.exec();
 
 ![a](https://gitee.com/lbgf/ks/raw/master/setup/1.png)
 
+#### 运行异常处理
+jdk1.6开始多了一个字节码校验的环节，在使用BC模式生成字节码运行时有可能出现VerifyError错误，ks的引擎已经处理过stack map frame，但如果运行中依然报java.lang.VerifyError，可以加入vm参数-noverify禁用这个功能
+
 #### 参考资料
 <http://www.groovy-lang.org>  
 <https://github.com/chibash>  
 <https://asm.ow2.io>  
+<https://docs.oracle.com/javase/specs/jvms/se8/html/index.html>

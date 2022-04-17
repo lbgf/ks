@@ -32,4 +32,8 @@ public abstract class ScriptBase {
 		env.putBcValue(name, value);
 	}
 	
+	protected void doNothing() {
+		
+	}
+	
 }

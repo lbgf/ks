@@ -150,7 +150,7 @@ public class Name extends ASTLeaf {
 			return type;
 		} else {
 			
-			if (bcIndex >= 1) { // 为空但有索引号，是null和err变量
+			if (bcIndex >= 1) { // 为空但有索引号，是null或err变量
 				bcOp.getThis();
 				bcOp.gcMethod().visitLdcInsn(name());
 				bcOp.invokeVirtual("org/ks/bc/ScriptBase", "getVariable", "Ljava/lang/String;", "Ljava/lang/Object;", false);
@@ -203,12 +203,18 @@ public class Name extends ASTLeaf {
 				bcOp.gcMethod().visitVarInsn(BcGenerator.getOpsType(leftType), bcIndex);
 				// 如果是新变量生成局部变量表，但貌似没有这个也没问题...!^_^
 				// {}区间内不能需要生成局部变量表，方法体除外
+				/*
 				if (env.getOuter() == null) {
 					bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(leftType), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 				} else if (env.getOuter() != null && env.getOuter().isMethodEnvironment()) {
 					bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(leftType), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 				}
-				
+				*/
+
+				bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(leftType), null, bcOp.createAndVisitLabel(), bcOp.createAndVisitLabel(), bcIndex);
+				// 处理java.lang.VerifyError问题
+				env.putFrameObj(BcGenerator.getClassType2(leftType.getJavaClass()));
+				// 
 			} else if (right instanceof JavaKsStaticClass) {
 				JavaKsStaticClass jksc = (JavaKsStaticClass)right;
 				
@@ -219,17 +225,24 @@ public class Name extends ASTLeaf {
 				env.putType(0, index, type); // 保存变量的类型
 				
 				bcOp.gcMethod().visitVarInsn(BcGenerator.getOpsType(type), bcIndex);
-
+				
+				/*
 				if (env.getOuter() == null) {
 					bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 				} else if (env.getOuter() != null && env.getOuter().isMethodEnvironment()) {
 					bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 				}
+				*/
+				
+				bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createAndVisitLabel(), bcOp.createAndVisitLabel(), bcIndex);
+				// 处理java.lang.VerifyError问题
+				env.putFrameObj(BcGenerator.getClassType2(type.getJavaClass()));
+				// 
 				
 				return type;
 			} else if (right instanceof JavaKsObject) {
 				JavaKsObject jko = (JavaKsObject)right;
-				
+								
 				VarType type = new VarType(jko.getJavaClass());
 				type.setJavaObject(true);
 				
@@ -237,12 +250,19 @@ public class Name extends ASTLeaf {
 				env.putType(0, index, type); // 保存变量的类型
 				
 				bcOp.gcMethod().visitVarInsn(BcGenerator.getOpsType(type), bcIndex);
-
+				
+				/*
 				if (env.getOuter() == null) {
 					bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 				} else if (env.getOuter() != null && env.getOuter().isMethodEnvironment()) {
 					bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createLabel(), bcOp.createLabel(), bcIndex);
 				}
+				*/
+				
+				bcOp.gcMethod().visitLocalVariable(name(), BcGenerator.getBcType(type), null, bcOp.createAndVisitLabel(), bcOp.createAndVisitLabel(), bcIndex);
+				// 处理java.lang.VerifyError问题
+				env.putFrameObj(BcGenerator.getClassType2(type.getJavaClass()));
+				//
 				
 				return type;
 			}

@@ -9,11 +9,11 @@
 
 package org.ks.runtime;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.ks.bc.StackMapFrames;
 import org.ks.core.KsClassLoader;
 import org.ks.core.KsException;
 import org.ks.core.ListStack;
@@ -51,7 +51,9 @@ public class KsEnvironment implements Environment, Cloneable {
 	
 	protected KsClassLoader loader; // 类加载器
 	
-	protected List<Object> frameObjs;
+	// protected List<Object> frameObjs;
+	
+	protected StackMapFrames smf;
 
 	public KsEnvironment() {
 		values = new Object[10]; 
@@ -107,22 +109,24 @@ public class KsEnvironment implements Environment, Cloneable {
 			}*/
 			//
 			
-		} else if (outer == null)
+		} else if (outer == null) {
 			return null;
-		else
+		} else {
 			return outer.get(nest - 1, index);
+		}
 	}
 
 	public void put(int nest, int index, Object value) {
-		if (nest == 0)
+		if (nest == 0) {
 			assign(index, value);
-		else {
-			if (nest == 0)
+		} else {
+			if (nest == 0) {
 				values[index] = value;
-			else if (outer == null)
+			} else if (outer == null) {
 				throw new KsException("no outer environment");
-			else
+			} else {
 				outer.put(nest - 1, index, value);
+			}
 		}
 	}
 
@@ -133,19 +137,22 @@ public class KsEnvironment implements Environment, Cloneable {
 		}
 		
 		Integer i = names.find(name);
-		if (i == null)
-			if (outer == null)
+		if (i == null) {
+			if (outer == null) {
 				return null;
-			else
+			} else {
 				return outer.get(name);
-		else
+			}
+		} else {
 			return values[i];
+		}
 	}
 
 	public void put(String name, Object value) {
 		Environment e = where(name);
-		if (e == null)
+		if (e == null) {
 			e = this;
+		}
 		e.putNew(name, value);
 	}
 
@@ -154,12 +161,13 @@ public class KsEnvironment implements Environment, Cloneable {
 	}
 
 	public Environment where(String name) {
-		if (names.find(name) != null)
+		if (names.find(name) != null) {
 			return this;
-		else if (outer == null)
+		} else if (outer == null) {
 			return null;
-		else
+		} else {
 			return outer.where(name);
+		}
 	}
 
 	public void setOuter(Environment e) {
@@ -174,8 +182,9 @@ public class KsEnvironment implements Environment, Cloneable {
 		// System.out.println(index + "," + values.length); // test
 		if (index >= values.length) {
 			int newLen = values.length * 3; // 这个数字要处理，变更大小时可能有问题， 目前改变3倍增长
-			if (index >= newLen)
+			if (index >= newLen) {
 				newLen = index + 1;
+			}
 			values = Arrays.copyOf(values, newLen);
 		}
 		values[index] = value;
@@ -224,33 +233,36 @@ public class KsEnvironment implements Environment, Cloneable {
 	}
 	
 	public void putType(int nest, int index, VarType type) {
-		if (nest == 0)
+		if (nest == 0) {
 			assignType(index, type);
-		else {
-			if (nest == 0)
+		} else {
+			if (nest == 0) {
 				types[index] = type;
-			else if (outer == null)
+			} else if (outer == null) {
 				throw new KsException("no outer environment");
-			else
+			} else {
 				outer.putType(nest - 1, index, type);
+			}
 		}
 	}
 	
 	public VarType getType(int nest, int index) {
-		if (nest == 0)
+		if (nest == 0) {
 			return types[index];
-		else if (outer == null)
+		} else if (outer == null) {
 			return null;
-		else
+		} else {
 			return outer.getType(nest - 1, index);
+		}
 	}
 	
 	protected void assignType(int index, VarType type) {
 		// System.out.println(index + "," + types.length);
 		if (index >= types.length) {
 			int newLen = types.length * 3;
-			if (index >= newLen)
+			if (index >= newLen) {
 				newLen = index + 1;
+			}
 			types = Arrays.copyOf(types, newLen);
 		}
 		types[index] = type;
@@ -394,35 +406,57 @@ public class KsEnvironment implements Environment, Cloneable {
 
 	public KsClassLoader getKsClassLoader() {
 		if(outer != null) {
-			this.outer.getKsClassLoader();
+			return this.outer.getKsClassLoader();
 		}
 		return loader;
 	}
 	
-	public void initFrameObjs() {
-		frameObjs = new ArrayList<Object>();
+	public void initSmf() {
+		smf = new StackMapFrames();
+	}
+	
+	public void initSmf(StackMapFrames smfP) {
+		smf = new StackMapFrames();
+		smf.putFrameObjs(smfP.getFrameObjs());
+		smf.putNewSize(smfP.getNewSize());
+		smf.putOldSize(smfP.getOldSize());
+	}
+	
+	public StackMapFrames getSmf() {
+		if(smf == null && outer != null) {
+			return this.outer.getSmf();
+		} 
+		return smf;
 	}
 	
 	public List<Object> getFrameObjs() {
-		if(outer != null) {
-			this.outer.getFrameObjs();
+		if(smf == null && outer != null) {
+			return this.outer.getFrameObjs();
 		}
-		return frameObjs;
+		return smf.getFrameObjs();
 	}
 	
-	public void putFrameObjs(Object value) { 
-		if(outer != null) {
-			this.outer.putFrameObjs(value);
+	public void putFrameObjs(List<Object> objList) { 
+		if(smf == null && outer != null) {
+			this.outer.putFrameObjs(objList);
 		} else {
-			frameObjs.add(value);
+			smf.putFrameObjs(objList);
+		}
+	}
+	
+	public void putFrameObj(Object value) { 
+		if(smf == null && outer != null) {
+			this.outer.putFrameObj(value);
+		} else {
+			smf.putFrameObj(value);
 		}
 	}
 	
 	public void clearFrameObjs() { 
-		if(outer != null) {
+		if(smf == null && outer != null) {
 			this.outer.clearFrameObjs();
 		} else {
-			frameObjs.clear();
+			smf.clearFrameObjs();
 		}
 	}
 	

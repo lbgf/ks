@@ -87,6 +87,11 @@ public class BlockStatement extends ASTList {
 		// 新加的，处理变量空间问题
 		KsEnvironment newEnv = new KsEnvironment(10, env);
 		//
+		
+		// 处理java.lang.VerifyError问题
+		newEnv.initSmf(env.getSmf());
+		// 
+		
 		for (ASTNode t : this) {
 			// t.compile(env, bcOp);
 

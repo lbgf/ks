@@ -82,12 +82,21 @@ public class ParameterList extends ASTList {
   	    	env.putType(0, offsets[i], BcGenerator.toValueType(type));
   	    	bcOp.gcMethod().visitLocalVariable(name(i), BcGenerator.getClassType(BcGenerator.toValueType(type).getJavaClass()),
   	    			null, bcOp.createLabel(), bcOp.createLabel(), bcOffsets[i]); 
+    		
+		    	// 处理java.lang.VerifyError问题
+					env.putFrameObj(BcGenerator.getClassType2(BcGenerator.toValueType(type).getJavaClass()));
+					// 
+  	    	
     		} else {
     			throw new KsException("不支持的参数类型", this);
     		}
     	} else {
 	    	env.put(0, offsets[i], new VarType(Object.class));
 	    	env.putType(0, offsets[i], new VarType(Object.class));
+	    	
+	    	// 处理java.lang.VerifyError问题
+				env.putFrameObj(BcGenerator.getClassType2(Object.class));
+				// 
 	    	
 	    	bcOp.gcMethod().visitLocalVariable(name(i), BcGenerator.getClassType(Object.class), null, bcOp.createLabel(), bcOp.createLabel(), bcOffsets[i]); 
     	}
