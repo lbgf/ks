@@ -113,4 +113,8 @@ public interface Environment {
 	
 	public void clearFrameObjs();
 	
+	public byte getRunWay();
+	
+	public void setRunWay(byte runWay);
+	
 }

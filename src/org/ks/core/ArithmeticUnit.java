@@ -44,6 +44,17 @@ public class ArithmeticUnit {
 		return new Double(-o).doubleValue();
 	}
 	
+	public boolean not(Object o) {
+		if (o instanceof Boolean) {
+			return not(((Boolean)o).booleanValue());
+		} 
+		return o!=null;
+	}
+	
+	public boolean not(boolean o) {
+		return !o;
+	}
+	
 	public Object plus(Object t1, Object t2) {
 		if (t1 instanceof Integer && t2 instanceof Integer) {
 			return plus(((Integer)t1).intValue(), ((Integer)t2).intValue());
@@ -1134,7 +1145,7 @@ public class ArithmeticUnit {
 			}
 		} else if(op.equals("<=>")) {
 			if (t1 != null && t2 != null) {
-				return ((Class<?>)t1).isAssignableFrom(t2.getClass())?true : false;
+				return ((Class<?>)t2).isAssignableFrom(t1.getClass())?true : false;
 			} else {
 				return false;
 			}
@@ -1154,6 +1165,8 @@ public class ArithmeticUnit {
 			return compare(t1, ((Double)t2).doubleValue(), op);
 		} else if ( t2 instanceof Boolean) {
 			return compare(t1, ((Boolean)t2).booleanValue(), op);
+		} else if ( t2 instanceof Class) {
+			return ((Class<?>)t2).isAssignableFrom(Integer.class)?true : false;
 		} else {
 			return false;
 		}
@@ -1186,6 +1199,8 @@ public class ArithmeticUnit {
 			return compare(t1, ((Double)t2).doubleValue(), op);
 		} else if ( t2 instanceof Boolean) {
 			return compare(t1, ((Boolean)t2).booleanValue(), op);
+		} else if ( t2 instanceof Class) {
+			return ((Class<?>)t2).isAssignableFrom(Long.class)?true : false;
 		} else {
 			return false;
 		}
@@ -1218,6 +1233,8 @@ public class ArithmeticUnit {
 			return compare(t1, ((Double)t2).doubleValue(), op);
 		} else if ( t2 instanceof Boolean) {
 			return compare(t1, ((Boolean)t2).booleanValue(), op);
+		} else if ( t2 instanceof Class) {
+			return ((Class<?>)t2).isAssignableFrom(Float.class)?true : false;
 		} else {
 			return false;
 		}
@@ -1250,6 +1267,8 @@ public class ArithmeticUnit {
 			return compare(t1, ((Double)t2).doubleValue(), op);
 		} else if ( t2 instanceof Boolean) {
 			return compare(t1, ((Boolean)t2).booleanValue(), op);
+		} else if ( t2 instanceof Class) {
+			return ((Class<?>)t2).isAssignableFrom(Double.class)?true : false;
 		} else {
 			return false;
 		}
@@ -1282,6 +1301,8 @@ public class ArithmeticUnit {
 			return compare(t1, ((Double)t2).doubleValue(), op);
 		} else if ( t2 instanceof Boolean) {
 			return compare(t1, ((Boolean)t2).booleanValue(), op);
+		} else if ( t2 instanceof Class) {
+			return ((Class<?>)t2).isAssignableFrom(Boolean.class)?true : false;
 		} else {
 			return false;
 		}

@@ -30,6 +30,7 @@ import org.ks.ast.IntegerLiteral;
 import org.ks.ast.LongLiteral;
 import org.ks.ast.Name;
 import org.ks.ast.NegativeExpression;
+import org.ks.ast.NotExpression;
 import org.ks.ast.NullStatement;
 import org.ks.ast.ParameterList;
 import org.ks.ast.PrimaryExpression;
@@ -74,6 +75,7 @@ public class KsParser {
 	 * 初始化结束符
 	 */
 	private void initEM() {
+		endMarks.add("]");
     endMarks.add(":");
     endMarks.add(";");
     endMarks.add("}");
@@ -96,12 +98,19 @@ public class KsParser {
 				rule().ksBoolean(BooleanLiteral.class),
 				rule().ksString(StringLiteral.class),
 				rule().identifier(Name.class, endMarks));
-		KsCombinator factor = rule().or(rule(NegativeExpression.class).sep("-").ast(pe), pe);
+		KsCombinator factor = rule().or(
+				rule(NegativeExpression.class).sep("-").ast(pe),
+				rule(NotExpression.class).sep("!").ast(pe), 
+				pe);
 		KsCombinator expr = expr0.expression(BinaryExpression.class, factor, operators);
 		KsCombinator simple = rule(PrimaryExpression.class).ast(expr);
-		KsCombinator ternary = rule(TernaryStatement.class).sep("@").sep("(").ast(expr).sep("?").ast(expr)
+		
+		/*KsCombinator ternary = rule(TernaryStatement.class).sep("@").sep("(").ast(expr).sep("?").ast(expr)
 				.sep(":").ast(expr).sep(")"); // 三元表达式
-		pe.insertChoice(ternary);
+		pe.insertChoice(ternary);*/
+		// 三元表达式
+		KsCombinator ternary = rule(TernaryStatement.class).ast(expr).sep("?").ast(expr).sep(":").ast(expr);
+		pe.insertChoice(rule().sep("@").maybe(ternary));
 		
 		// 类型
 		KsCombinator type = rule(TypeStatement.class).sep(":").identifier(endMarks);
@@ -178,7 +187,6 @@ public class KsParser {
 	  // 数组
 	  KsCombinator elements = rule(ArrayLiteral.class)
 	      .ast(expr).repeat(rule().sep(",").ast(expr));
-	  endMarks.add("]");
 	  pe.insertChoice(rule().sep("[").maybe(elements).sep("]"));
     postfix.insertChoice(rule(ArrayRef.class).sep("[").ast(expr).sep("]"));
     

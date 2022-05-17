@@ -216,7 +216,42 @@ public class BinaryExpression extends ASTList {
   				}  else {
   					throw new KsException("不支持的类型", this);
   				}
-				} else {
+				} else if (pe.hasPostfix(0) && pe.postfix(0) instanceof ArrayRef) { // 数组
+  				/*Object obj = pe.evalSub(env, 1);
+  				if (obj instanceof Object[]) {
+  					ArrayRef aref = (ArrayRef) pe.postfix(0);
+  					Object index = aref.index().eval(env);
+  					if (index instanceof Integer) {
+  						((Object[]) obj)[(Integer) index] = rvalue;
+  						return rvalue;
+  					}
+  				}*/
+					Object objl = pe.compileSub(env, bcOp, 1);
+					
+					ArrayRef aref = (ArrayRef) pe.postfix(0);
+					Object obji = aref.index().compile(env, bcOp);
+					if (obji instanceof VarType) {
+						VarType iType = (VarType)obji;
+						if(BcGenerator.isWrapperType(iType)) {
+							iType = BcGenerator.toValueType((VarType)iType, bcOp);
+						}
+					} else {
+						throw new KsException("不能识别的类型", this);
+					}
+					
+					Object objr = right().compile(env, bcOp);
+					if (objr instanceof VarType) {
+						VarType rType = (VarType)objr;
+						if(BcGenerator.isValueType(rType)) {
+							rType = BcGenerator.toWrapperType((VarType)rType, bcOp);
+						}
+						bcOp.gcMethod().visitInsn(BcOpcodes.AASTORE); 
+					} else {
+						throw new KsException("不能识别的类型", this);
+					}					
+					
+  				// throw new KsException("数组出错", this);
+  			} else {
 					throw new KsException("错误的表达式", this);
 				}
 			} else {

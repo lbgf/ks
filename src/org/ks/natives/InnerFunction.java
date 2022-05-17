@@ -26,6 +26,14 @@ public class InnerFunction {
 	public static Object toObject(Object value) {
 		return Object.class.cast(value);
 	}
+	
+	public static String[] toStringArray(Object[] args) {
+		String[] tmp = new String[args.length];
+		for(int i = 0; i < args.length; i++) {
+			tmp[i] = args[i].toString();
+		}
+		return tmp;
+	}
 
 	public static long currentTime() {
 		return System.currentTimeMillis();

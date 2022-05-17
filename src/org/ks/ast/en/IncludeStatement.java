@@ -18,6 +18,7 @@ import org.ks.ast.ASTLeaf;
 import org.ks.ast.ASTList;
 import org.ks.ast.ASTNode;
 import org.ks.ast.NullStatement;
+import org.ks.bc.BcOpcodes;
 import org.ks.core.KsException;
 import org.ks.core.KsRunner;
 import org.ks.lexer.KsLexer;
@@ -56,9 +57,46 @@ public class IncludeStatement extends ASTList {
 		
 		String name = name();
 		String path = "";
+
+		if (env.getScriptRootPath() != null) {
+			path = env.getScriptRootPath();
+		} else {
+			path = new File("").getAbsolutePath();
+		}
 		
+		// 执行外部脚本
+		Object rr = null;
+		try {
+			LineNumberReader r = new LineNumberReader(new FileReader(path + "/" + name));
+			String str = null;
+			String code = "";
+	    while ((str = r.readLine()) != null) {
+	    	code += str + "\n";
+	    }
+	    r.close();
+			KsLexer l = new KsLexer(code);
+			KsParser kp = new KsParser(KsRunner.GLPS);    
+			while (l.peek(0) != Token.EOF) {
+				ASTNode t = kp.parse(l);
+				if (!(t instanceof NullStatement)) {
+					t.lookup(env.symbols());
+					rr = t.eval(env);
+				}
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			throw new KsException("引用脚本(" + name + ")发生错误：" + e.getMessage());
+		}
 		
+		return null;
+	}
+	
+	public Object compile(Environment env, BcOpcodes bcOp) {
+		// System.out.println("Include"); // test
 		
+		String name = name();
+		String path = "";
+
 		if (env.getScriptRootPath() != null) {
 			path = env.getScriptRootPath();
 		} else {
@@ -75,21 +113,22 @@ public class IncludeStatement extends ASTList {
 	    }
 	    r.close();
 			KsLexer l = new KsLexer(code);
-			KsParser kp = new KsParser(KsRunner.GLPS);    
-	    Object rr = null;
+			KsParser bp = new KsParser(KsRunner.GLPS);    
+			
 			while (l.peek(0) != Token.EOF) {
-				ASTNode t = kp.parse(l);
+				ASTNode t = bp.parse(l);
 				if (!(t instanceof NullStatement)) {
 					t.lookup(env.symbols());
-					rr = t.eval(env);
+					t.compile(env, bcOp);
 				}
 			}
+
 		} catch(Exception e) {
 			e.printStackTrace();
 			throw new KsException("引用脚本(" + name + ")发生错误：" + e.getMessage());
 		}
 		
-		return "";
+		return null;
 	}
 
 }

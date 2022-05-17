@@ -21,7 +21,7 @@ import org.ks.runtime.VarType;
  * 字节码生成器.
  *
  */
-public class BcGenerator  {
+public class BcGenerator {
  
 	private static final Map<String, String> ARITHMETIC_TYPE_MAP  = new LinkedHashMap<String, String>(); 
 	
@@ -362,6 +362,8 @@ public class BcGenerator  {
 			return "F";
 		} else if (type.getJavaClass().isAssignableFrom(double.class)) {
 			return "D";
+		} else if (type.getJavaClass().isArray()) { // 数组
+			return type.getJavaClass().getName().replaceAll("[.]", "/");
 		} else { // to do: 继续加
 			return "L" + type.getJavaClass().getName().replaceAll("[.]", "/")+";";
 		} 
@@ -560,15 +562,26 @@ public class BcGenerator  {
 				return new VarType(void.class);
 			// to do: 继续加
 			default:
-				String typeNew = type.substring(1, type.length() - 1).replaceAll("/", ".");
-				try {
-					VarType varType = new VarType(Class.forName(typeNew));
-					varType.setJavaObject(true);
+				if (type.indexOf("[") == 0) { // 数组
+					VarType varType = null;
+					try {
+						varType = new VarType(Class.forName(type.replaceAll("/", ".")));
+	  			} catch(Exception e) {
+	  				// e.printStackTrace();
+	  				throw new KsException(e.getMessage());
+	  			}
 					return varType;
-  			} catch(Exception e) {
-  				// e.printStackTrace();
-  				throw new KsException(e.getMessage());
-  			}
+				} else {
+					String typeNew = type.substring(1, type.length() - 1).replaceAll("/", ".");
+					try {
+						VarType varType = new VarType(Class.forName(typeNew));
+						varType.setJavaObject(true);
+						return varType;
+	  			} catch(Exception e) {
+	  				// e.printStackTrace();
+	  				throw new KsException(e.getMessage());
+	  			}
+				}
 				// return new VarType(Object.class);
 		}
 	}
@@ -609,6 +622,8 @@ public class BcGenerator  {
 			type = "D";
 		} else if (c.isAssignableFrom(void.class)) {
 			type = "V";
+		} else if (c.isArray()) { // 数组
+			type = c.getName().replaceAll("[.]", "/");
 		} else {
 			type = "L" + c.getName().replaceAll("[.]", "/")+";";
 		} // to do: 继续加
@@ -618,7 +633,8 @@ public class BcGenerator  {
 	
 	public static Object getClassType2(Class<?> c) {
 		if (c == null) {
-			return BcOpcodes.NULL;
+			return Object.class.getName().replaceAll("[.]", "/");
+			// return BcOpcodes.NULL;
 		}
 		if (c.isAssignableFrom(int.class)) {
 			return BcOpcodes.INTEGER;
@@ -630,9 +646,32 @@ public class BcGenerator  {
 			return BcOpcodes.FLOAT;
 		} else if (c.isAssignableFrom(double.class)) {
 			return BcOpcodes.DOUBLE;
+		} else if (c.isArray()) { // 数组
+			return c.getName().replaceAll("[.]", "/");
 		} else {
 			return c.getName().replaceAll("[.]", "/");
 		} // to do: 继续加
+
+	}
+	
+	public static String getClassType3(Class<?> c) {
+		String type = null;
+		if (c.isAssignableFrom(int.class)) {
+			type = "I";
+		} else if (c.isAssignableFrom(long.class)) {
+			type = "J";
+		} else if (c.isAssignableFrom(boolean.class)) {
+			type = "Z";
+		} else if (c.isAssignableFrom(float.class)) {
+			type = "F";
+		} else if (c.isAssignableFrom(double.class)) {
+			type = "D";
+		} else if (c.isAssignableFrom(void.class)) {
+			type = "V";
+		} else {
+			type = c.getName().replaceAll("[.]", "/");
+		} // to do: 继续加
+		return type;
 
 	}
 

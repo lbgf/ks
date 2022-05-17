@@ -128,9 +128,11 @@ public class Name extends ASTLeaf {
 					}
 					
 				} else { // 不是NativeFunction，又没有类型的，是外部传入来的变量
+
 					bcOp.getThis();
 					bcOp.gcMethod().visitLdcInsn(name());
 					bcOp.invokeVirtual("org/ks/bc/ScriptBase", "getVariable", "Ljava/lang/String;", "Ljava/lang/Object;", false);
+					bcOp.gcMethod().visitTypeInsn(BcOpcodes.CHECKCAST, BcGenerator.getClassType3(env.getBcValue(name()).getClass()));
 					
 					type = new VarType(env.getBcValue(name()).getClass());
 					type.setExternal(true);
@@ -154,7 +156,7 @@ public class Name extends ASTLeaf {
 				bcOp.getThis();
 				bcOp.gcMethod().visitLdcInsn(name());
 				bcOp.invokeVirtual("org/ks/bc/ScriptBase", "getVariable", "Ljava/lang/String;", "Ljava/lang/Object;", false);
-								
+				
 				VarType type = new VarType();
 				type.setExternal(true);
 				return type;

@@ -13,8 +13,11 @@ import java.util.List;
 
 import org.ks.ast.ASTList;
 import org.ks.ast.ASTNode;
+import org.ks.ast.Name;
+import org.ks.bc.BcGenerator;
 import org.ks.bc.BcOpcodes;
 import org.ks.runtime.Environment;
+import org.ks.runtime.VarType;
 import org.objectweb.asm.Label;
 
 /**
@@ -57,7 +60,18 @@ public class IfStatement extends ASTList {
 	
 	public Object compile(Environment env, BcOpcodes bcOp) {
 		// System.out.println("If");  // test
-		condition().compile(env, bcOp);
+		if (condition() instanceof Name) {
+			Object obj = condition().compile(env, bcOp);
+			if (obj instanceof VarType) {
+				VarType type = (VarType)obj;
+				if(BcGenerator.isWrapperType(type)) {
+					type = BcGenerator.toValueType((VarType)type, bcOp);
+				}
+			} 
+			// to do：外部变量null和err的情况
+		} else {
+			condition().compile(env, bcOp);
+		}
 		Label l1 = bcOp.createLabel();
 		bcOp.gcMethod().visitJumpInsn(BcOpcodes.IFEQ, l1);
     thenBlock().compile(env, bcOp);
@@ -69,11 +83,7 @@ public class IfStatement extends ASTList {
 			// 处理java.lang.VerifyError问题
 			if (env.getSmf().getNewSize() > env.getSmf().getOldSize()) {
 				env.getSmf().syncSize();
-				try {
-					bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
 			} else {
 				bcOp.gcMethod().visitFrame(BcOpcodes.F_SAME, 0, null, 0, null);
 			}
@@ -84,11 +94,7 @@ public class IfStatement extends ASTList {
 			// 处理java.lang.VerifyError问题
 			if (env.getSmf().getNewSize() > env.getSmf().getOldSize()) {
 				env.getSmf().syncSize();
-				try {
-					bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
 			} else {
 				bcOp.gcMethod().visitFrame(BcOpcodes.F_SAME, 0, null, 0, null);
 			}
@@ -100,11 +106,7 @@ public class IfStatement extends ASTList {
 			// System.out.println("if,," + env.getFrameObjs() + "," + env.getSmf().getNewSize() + "," + env.getSmf().getOldSize());
 			if (env.getSmf().getNewSize() > env.getSmf().getOldSize()) {
 				env.getSmf().syncSize();
-				try {
-					bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				bcOp.gcMethod().visitFrame(BcOpcodes.F_FULL, env.getFrameObjs().size(), env.getFrameObjs().toArray(), 0, new Object[]{});
 			} else {
 				bcOp.gcMethod().visitFrame(BcOpcodes.F_SAME, 0, null, 0, null);
 			}

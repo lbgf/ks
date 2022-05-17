@@ -153,6 +153,7 @@ public class KsRunner {
 			ksEnv.initFristEnv();
 		}
 		ksEnv.initVarIndex(); // 用于BC
+		ksEnv.setRunWay(runWay);
 		
 		if(lps == null) {
 			lps = new ArrayList<LanguagePkg>();
@@ -209,12 +210,12 @@ public class KsRunner {
 	/**
 	 * 加入扩展方法.
 	 * 
-	 * @param name
-	 * @param clazz
-	 * @param methodName
-	 * @param params
+	 * @param name String: 注册的方法名称.
+	 * @param clazz Class<?>: 扩展的类.
+	 * @param methodName String: 扩展的方法名.
+	 * @param params Class<?>[]: 参数数组.
 	 */
-	public void appendNative(String name, Class<?> clazz, String methodName, Class<?>... params) {
+	public void appendNative(String name, Class<?> clazz, String methodName, Class<?>[] params) {
 		kn.append(ksEnv, name, clazz, methodName, params);
 	}
 	
@@ -283,7 +284,7 @@ public class KsRunner {
     	// run方法
     	bcOp.createMethod(BcOpcodes.ACC_PUBLIC, "run", null, "Ljava/lang/Object;");
     	bcOp.gcMethod().visitCode();
-    	// bcOp.gcMethod().visitVarInsn(Opcodes.ALOAD, 0); // // 这句代码引起性能问题，循环的时候很慢
+    	// bcOp.gcMethod().visitVarInsn(Opcodes.ALOAD, 0); // 这句代码引起性能问题，循环的时候很慢
     	// bcOp.gcMethod().visitParameter("evn", 0);
     	boolean hasReturn = false;
     	while (l.peek(0) != Token.EOF) {

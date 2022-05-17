@@ -13,8 +13,11 @@ import java.util.List;
 
 import org.ks.ast.ASTList;
 import org.ks.ast.ASTNode;
+import org.ks.ast.Name;
+import org.ks.bc.BcGenerator;
 import org.ks.bc.BcOpcodes;
 import org.ks.runtime.Environment;
+import org.ks.runtime.VarType;
 import org.objectweb.asm.Label;
 
 /**
@@ -75,7 +78,18 @@ public class WhileStatement extends ASTList {
 		//
 		
 		bcOp.gcMethod().visitLabel(l2);
-		condition().compile(env, bcOp);
+		if (condition() instanceof Name) {
+			Object obj = condition().compile(env, bcOp);
+			if (obj instanceof VarType) {
+				VarType type = (VarType)obj;
+				if(BcGenerator.isWrapperType(type)) {
+					type = BcGenerator.toValueType((VarType)type, bcOp);
+				}
+			}
+			// to do：外部变量null和err的情况
+		} else {
+			condition().compile(env, bcOp);
+		}
 		bcOp.gcMethod().visitJumpInsn(BcOpcodes.IFEQ, l1);
     body().compile(env, bcOp);
     bcOp.gcMethod().visitJumpInsn(BcOpcodes.GOTO, l2);

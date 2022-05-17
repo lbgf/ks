@@ -9,16 +9,19 @@
 
 package org.ks.ast;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import org.ks.bc.BcGenerator;
 import org.ks.bc.BcOpcodes;
 import org.ks.core.KsException;
 import org.ks.jvm.JavaKsObject;
 import org.ks.jvm.JavaKsStaticClass;
 import org.ks.runtime.Environment;
 import org.ks.runtime.VarType;
+import org.objectweb.asm.Type;
 
 /**
  * 表达"."一点；
@@ -70,6 +73,8 @@ public class Dot extends Postfix {
   			try {
   				if (member.equals("class")) {
   					return Class.forName(c.getName());
+  				} else if(member.equals("length") && value.getClass().isArray()) {
+  					return Array.getLength(value);
   				}
   				return c.getField(member).get(c); // 属性（为空时如果下一个还是属性就会出现异常返回）
   			} catch(Exception e) {
@@ -86,7 +91,10 @@ public class Dot extends Postfix {
     		try {
     			if (member.equals("class")) {
   					return Class.forName(c.getName());
+  				} else if(member.equals("length") && value.getClass().isArray()) {
+  					return Array.getLength(value);
   				}
+    			
     			return c.getField(member).get(value); // 属性
   			} catch(Exception e) {
   				// e.printStackTrace();
@@ -149,6 +157,11 @@ public class Dot extends Postfix {
 			} else if(type.isClassLib()) { // 类库（java静态类）
 				Class<?> c = type.getJavaClass();
 				try {
+					if (member.equals("class")) {
+						bcOp.gcMethod().visitLdcInsn(Type.getType(BcGenerator.getClassType(c)));
+						return new VarType(c.getClass());
+					}
+					
 					String className = c.getName().replaceAll("[.]", "/");
 					Field f = c.getField(member);
 					String fieldClassName =  f.getGenericType().getTypeName().replaceAll("[.]", "/");
@@ -203,9 +216,13 @@ public class Dot extends Postfix {
 				bcOp.getField(className, member, "Ljava/lang/Object;");				
 				return new JavaKsObject(Object.class, member);
 				
+			} else if (type.getJavaClass().isArray() && member.equals("length")) {
+				bcOp.gcMethod().visitInsn(BcOpcodes.ARRAYLENGTH);
+				return new VarType(int.class);
 			} else {
-				System.out.println("暂时不能识别的类型");
-				return null;
+				//System.out.println("暂时不能识别的类型");
+				//return null;
+				throw new KsException("不能识别的类型", this);
 			}
 			
 		} else if (value instanceof JavaKsStaticClass) { // 上一级是静态类，现在访问属性

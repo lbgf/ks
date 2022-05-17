@@ -32,6 +32,7 @@ public abstract class Natives {
 		try {
 			m = clazz.getMethod(methodName, inParams);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new KsException("找不到原生方法: " + methodName);
 		}
 		env.put(name, new NativeFunction(methodName, m));

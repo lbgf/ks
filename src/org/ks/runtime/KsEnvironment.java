@@ -50,10 +50,10 @@ public class KsEnvironment implements Environment, Cloneable {
 	protected String saveClassPath;  // 保存类的目录
 	
 	protected KsClassLoader loader; // 类加载器
+		
+	protected StackMapFrames smf; // 处理堆栈验证
 	
-	// protected List<Object> frameObjs;
-	
-	protected StackMapFrames smf;
+	protected byte runWay = -1; // 运行模式
 
 	public KsEnvironment() {
 		values = new Object[10]; 
@@ -123,7 +123,7 @@ public class KsEnvironment implements Environment, Cloneable {
 			if (nest == 0) {
 				values[index] = value;
 			} else if (outer == null) {
-				throw new KsException("no outer environment");
+				throw new KsException("上层环境为空");
 			} else {
 				outer.put(nest - 1, index, value);
 			}
@@ -179,7 +179,6 @@ public class KsEnvironment implements Environment, Cloneable {
 	}
 
 	protected void assign(int index, Object value) {
-		// System.out.println(index + "," + values.length); // test
 		if (index >= values.length) {
 			int newLen = values.length * 3; // 这个数字要处理，变更大小时可能有问题， 目前改变3倍增长
 			if (index >= newLen) {
@@ -257,7 +256,6 @@ public class KsEnvironment implements Environment, Cloneable {
 	}
 	
 	protected void assignType(int index, VarType type) {
-		// System.out.println(index + "," + types.length);
 		if (index >= types.length) {
 			int newLen = types.length * 3;
 			if (index >= newLen) {
@@ -344,8 +342,9 @@ public class KsEnvironment implements Environment, Cloneable {
 	public void setScriptName(String scriptName) {
 		if(outer != null) {
 			this.outer.setScriptName(scriptName);
+		} else {
+			this.scriptName = scriptName;
 		}
-		this.scriptName = scriptName;
 	}
 	
 	public boolean isMethodEnvironment() {
@@ -358,7 +357,7 @@ public class KsEnvironment implements Environment, Cloneable {
 	
 	public String getScriptRootPath() {
 		if(outer != null) {
-			this.outer.getScriptRootPath();
+			return this.outer.getScriptRootPath();
 		}
 		return scriptRootPath;
 	}
@@ -366,13 +365,14 @@ public class KsEnvironment implements Environment, Cloneable {
 	public void setScriptRootPath(String scriptRootPath) {
 		if(outer != null) {
 			this.outer.setScriptRootPath(scriptRootPath);
+		} else {
+			this.scriptRootPath =  scriptRootPath;
 		}
-		this.scriptRootPath =  scriptRootPath;
 	}
 	
 	public String getSaveClassPath() {
 		if(outer != null) {
-			this.outer.getSaveClassPath();
+			return this.outer.getSaveClassPath();
 		}
 		return saveClassPath;
 	}
@@ -380,8 +380,9 @@ public class KsEnvironment implements Environment, Cloneable {
 	public void setSaveClassPath(String saveClassPath) {
 		if(outer != null) {
 			this.outer.setSaveClassPath(saveClassPath);
+		} else {
+			this.saveClassPath =  saveClassPath;
 		}
-		this.saveClassPath =  saveClassPath;
 	}
 	
 	public String getSubScriptName() {
@@ -389,8 +390,9 @@ public class KsEnvironment implements Environment, Cloneable {
 			return subScriptName;
 		} else if(outer != null) {
 			return this.outer.getSubScriptName();
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	public void setSubScriptName(String subScriptName) {
@@ -400,8 +402,9 @@ public class KsEnvironment implements Environment, Cloneable {
 	public void setKsClassLoader(KsClassLoader loader) {
 		if(outer != null) {
 			this.outer.setKsClassLoader(loader);
+		} else {
+			this.loader = loader;
 		}
-		this.loader = loader;
 	}
 
 	public KsClassLoader getKsClassLoader() {
@@ -457,6 +460,21 @@ public class KsEnvironment implements Environment, Cloneable {
 			this.outer.clearFrameObjs();
 		} else {
 			smf.clearFrameObjs();
+		}
+	}
+	
+	public byte getRunWay() {
+		if(outer != null) {
+			return this.outer.getRunWay();
+		}
+		return runWay;
+	}
+	
+	public void setRunWay(byte runWay) {
+		if(outer != null) {
+			this.outer.setRunWay(runWay);
+		} else {
+			this.runWay =  runWay;
 		}
 	}
 	

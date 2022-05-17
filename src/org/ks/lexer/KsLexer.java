@@ -97,7 +97,14 @@ public class KsLexer {
 				throw new ParseException("错误的标记，出错行号为：" + lineNo);
 			}
 		}
-		if (!isStringBlock) { // 字符块内不加结束符
+		String tmpStr = line.trim();
+		if (isStringBlock) { // 字符块内不加结束符
+			
+		} else if (tmpStr.lastIndexOf(",") == tmpStr.length()-1) { // ,号结尾不加结束符
+			
+		} else if (tmpStr.lastIndexOf(".") == tmpStr.length()-1) { // .号结尾不加结束符
+			
+		} else {
 			queue.add(new IdToken(lineNo, 0, Token.EOL)); // 结束符
 		}
 	}

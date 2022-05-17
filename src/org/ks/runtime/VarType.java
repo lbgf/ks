@@ -22,6 +22,7 @@ public class VarType {
 	private boolean isExternal = false; // 外部变量
 	private boolean isThis = false; // this指针
 	private String scriptName; // 脚本名称，主要用于记录类名
+	private Object[] arrType = null; // 数组类型
 
 	public VarType() {
 	}
@@ -88,6 +89,14 @@ public class VarType {
 
 	public void setScriptName(String scriptName) {
 		this.scriptName = scriptName;
+	}
+
+	public Object[] getArrType() {
+		return arrType;
+	}
+
+	public void setArrType(Object[] arrType) {
+		this.arrType = arrType;
 	}
 
 }

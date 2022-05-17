@@ -52,7 +52,7 @@ public class AstView {
 	protected String code = "";
 	protected KsLexer kl = null;
 	protected KsParser kp = null;
-	public static List<LanguagePkg> GLPS;
+	protected List<LanguagePkg> glps;
 
 	/**
 	 * ¹¹Ôìº¯Êý.
@@ -67,7 +67,7 @@ public class AstView {
 			lps.add(new LanguagePkgEn());
 			lps.add(new LanguagePkgCn());
 		}
-		this.GLPS = lps;
+		this.glps = lps;
 		kl = new KsLexer(code);
 		kp = new KsParser(lps);
 	}
@@ -92,7 +92,7 @@ public class AstView {
 			lps.add(new LanguagePkgEn());
 			lps.add(new LanguagePkgCn());
 		}
-		this.GLPS = lps;
+		this.glps = lps;
 		kl = new KsLexer(code);
 		kp = new KsParser(lps);
 	}
@@ -100,7 +100,7 @@ public class AstView {
 	protected boolean check(ASTNode t, int no) {
 		boolean isFlag = false;
 		
-		for (LanguagePkg e : GLPS) {
+		for (LanguagePkg e : glps) {
 			if (no == 1 && t.getClass().isAssignableFrom(e.l_classStatement)) {
 				isFlag = true;
 				break;
@@ -232,11 +232,11 @@ public class AstView {
 		} else if (node instanceof Arguments) {
 			newNode = new DefaultMutableTreeNode("arg");
 			tree.add(newNode);
-		} else if (node instanceof Postfix) {
-			newNode = new DefaultMutableTreeNode("postfix");
-			tree.add(newNode);
 		} else if (node instanceof ArrayRef) {
 			newNode = new DefaultMutableTreeNode("array");
+			tree.add(newNode);
+		} else if (node instanceof Postfix) {
+			newNode = new DefaultMutableTreeNode("postfix");
 			tree.add(newNode);
 		} else if (node instanceof ArrayLiteral) {
 			newNode = new DefaultMutableTreeNode("[ ]");

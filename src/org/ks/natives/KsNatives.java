@@ -33,6 +33,7 @@ public class KsNatives extends Natives {
 		
 		append(env, "length", org.ks.natives.InnerFunction.class, "length", new Class[] {String.class});
 		append(env, "currentTime", org.ks.natives.InnerFunction.class, "currentTime", null);
+		append(env, "toStringArray", org.ks.natives.InnerFunction.class, "toStringArray", new Class[] {Object[].class});
 		
 	}
 	

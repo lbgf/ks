@@ -18,11 +18,11 @@ import org.ks.runtime.Environment;
 import org.ks.runtime.VarType;
 
 /**
- * 负数节点.
+ * 逻辑非节点.
  *
  */
-public class NegativeExpression extends ASTList {
-	public NegativeExpression(List<ASTNode> c) {
+public class NotExpression extends ASTList {
+	public NotExpression(List<ASTNode> c) {
 		super(c);
 	}
 
@@ -31,31 +31,27 @@ public class NegativeExpression extends ASTList {
 	}
 
 	public String toString() {
-		return "-" + operand();
+		return "!" + operand();
 	}
 
 	public Object eval(Environment env) {
 		Object v = (operand()).eval(env);
-		if (v instanceof Integer) {
-			return new Integer(-((Integer) v).intValue());
-		} else if (v instanceof Long) {
-			return new Long(-((Long) v).longValue());
-		} else if (v instanceof Double) {
-			return new Double(-((Double) v).doubleValue());
+		if (v instanceof Boolean) {
+			return new Boolean(!((Boolean)v));
 		} else {
 			throw new KsException("错误的类型 -", this);
 		}
 	}
 	
 	public Object compile(Environment env, BcOpcodes bcOp) {
-		// System.out.println("Negative");
+		// System.out.println("Not");
 		
 		bcOp.getThis();
 		bcOp.getField("org/ks/bc/ScriptBase", "au", "Lorg/ks/core/ArithmeticUnit;");
 		
 		Object obj = operand().compile(env, bcOp);
-		String nType = "";
-		String rType = "";
+		String nType = "Ljava/lang/Object;";
+		String rType = "Z";
 		
 		if (obj != null && obj instanceof VarType) {
 			VarType newType = new VarType(((VarType)obj).getJavaClass());
@@ -67,8 +63,7 @@ public class NegativeExpression extends ASTList {
 				rType = nType;
 			}
 		}
-		
-		bcOp.invokeVirtual("org/ks/core/ArithmeticUnit", "negative", nType, rType, false);
+		bcOp.invokeVirtual("org/ks/core/ArithmeticUnit", "not", nType, rType, false);
 		
 		return obj;
 	}

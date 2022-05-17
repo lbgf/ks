@@ -4,7 +4,7 @@
 基于jvm的可用中文编写的脚本语言（中文：赤子脚本语言、英文：kid script），也可扩展第三方语系(demo中有一个扩展日语的例子) [快速体验](#setup目录说明)
 
 #### 版本
-v0.7.20
+v0.7.26
 
 #### 运行环境
 jdk1.8
@@ -114,7 +114,7 @@ kr.exec();
     <th>包含</th>
     <th>包括其他ks脚本</th>
     <th>√</th>
-    <th>×</th>
+    <th>√</th>
 	</tr>
 	<tr>
     <th>var</th>
@@ -197,6 +197,13 @@ kr.exec();
     <th>closure</th>
     <th>闭包</th>
     <th>闭包</th>
+    <th>√</th>
+    <th>×</th>
+	</tr>
+	<tr>
+    <th>try...catch...finally</th>
+    <th>异常监控...捕获...收尾</th>
+    <th>异常处理</th>
     <th>√</th>
     <th>×</th>
 	</tr>
@@ -284,6 +291,12 @@ kr.exec();
     <th>√</th>
 	</tr>
 	<tr>
+    <th>！</th>
+    <th>非</th>
+    <th>√</th>
+    <th>√</th>
+	</tr>
+	<tr>
     <th>||</th>
     <th>或</th>
     <th>√</th>
@@ -299,7 +312,7 @@ kr.exec();
     <th><=></th>
     <th>归属</th>
     <th>√</th>
-    <th>×</th>
+    <th>√</th>
 	</tr>
 </table>
 
@@ -366,7 +379,20 @@ kr.exec();
 	</tr>
 	<tr>
     <th>√</th>
-    <th>×</th>
+    <th>√</th>
+	</tr>
+</table>
+
+三元表达式
+
+<table>
+	<tr>
+	  <th>DV模式</th>
+	  <th>BC模式</th>
+	</tr>
+	<tr>
+    <th>√</th>
+    <th>√</th>
 	</tr>
 </table>
 
@@ -410,7 +436,9 @@ kr.exec();
 
 >>|-- demo
 
->>>|-- astview (一个可以查看语法树的工具)
+>>>|-- astview (一个可以查看语法树的工具)，如下图
+
+![c](https://gitee.com/lbgf/ks/raw/master/setup/3.png)
 
 >>>|-- bc (以BC模式运行的例子)
 
@@ -427,6 +455,10 @@ kr.exec();
 为了方便使用打了个压缩包（[ks.zip](https://gitee.com/lbgf/ks/tree/master/setup)），解压后可以直接在windows运行，可以作为命令行使用，如下图
 
 ![a](https://gitee.com/lbgf/ks/raw/master/setup/1.png)
+
+也可以关注一下它的另一个项目，可视化编辑器（[ks_ide](https://gitee.com/lbgf/ks_ide)），如下图
+
+![a1](https://gitee.com/lbgf/ks_ide/raw/master/setup/3.png)
 
 #### 运行异常处理
 jdk1.6开始多了一个字节码校验的环节，在使用BC模式生成字节码运行时有可能出现VerifyError错误，ks的引擎已经处理过stack map frame，但如果运行中依然报java.lang.VerifyError，可以加入vm参数-noverify禁用这个功能
